@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Polaris Pro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2e5e4e">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Polaris Pro">
+<meta property="og:title" content="Polaris Pro">
+<meta property="og:description" content="Clear handwriting counts. Snap your shop's page, Polaris counts it, keeps it, and never touches your money.">
+<meta property="og:image" content="icon-512.png">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#f6f5f1; --surface:#ffffff; --ink:#1c2630; --muted:#737d88;
+    --line:#e6e2da; --accent:#2e5e4e; --accent-soft:#e7efe9;
+    --pen:#1c2630; --pencil:#9aa3ad; --warn:#9a5a2e; --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+  .num{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+  .wrap{max-width:440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+  .bar{display:flex;align-items:center;gap:8px;padding:14px 16px;position:sticky;top:0;
+    background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+  .bar h1{font-size:15px;font-weight:600;margin:0;flex:1;text-align:center;letter-spacing:.2px}
+  .ico{width:38px;height:38px;border:1px solid var(--line);background:var(--surface);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--ink)}
+  .ico:active{transform:scale(.96)}
+  .ico.ghost{border-color:transparent;background:transparent}
+  .lang{font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:1px solid #d4e3da;
+    border-radius:999px;padding:7px 11px;cursor:pointer;letter-spacing:.04em}
+  main{flex:1;padding:20px 16px 24px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  h2{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+  .lead{color:var(--muted);margin:0 0 20px;font-size:15px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .door{display:flex;gap:13px;align-items:flex-start}
+  .door .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+  .door b{display:block;font-size:15px;margin-bottom:2px}
+  .door span{color:var(--muted);font-size:13.5px}
+  .opt{display:flex;align-items:center;gap:12px;padding:15px 14px;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;margin-bottom:10px;cursor:pointer;width:100%;text-align:left;font-size:15px;color:var(--ink)}
+  .opt:active{transform:scale(.99)}
+  .opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .opt .k{flex:none;width:34px;height:34px;border-radius:9px;background:#f0efe9;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .opt .t{flex:1}
+  .opt .t small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
+  .btn{display:block;width:100%;padding:15px;border-radius:12px;border:0;font-size:16px;font-weight:600;
+    cursor:pointer;background:var(--accent);color:#fff;margin-top:6px}
+  .btn:active{transform:scale(.99)}
+  .btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .footer{padding:14px 16px;border-top:1px solid var(--line);background:var(--bg);position:sticky;bottom:0}
+  .line{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .line input.lbl{flex:1;border:0;background:transparent;font-size:15px;color:var(--ink);outline:none;padding:4px}
+  .line input.amt{width:92px;border:1px solid var(--line);border-radius:8px;padding:8px;text-align:right;font-size:15px;outline:none}
+  .line input.amt:focus{border-color:var(--accent)}
+  .toggle{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;font-size:11.5px;
+    padding:6px 10px;cursor:pointer;min-width:74px;text-align:center;font-weight:600}
+  .toggle.pen{color:var(--pen);border-color:var(--pen)}
+  .toggle.pencil{color:var(--pencil);border-color:#d9dde1}
+  .addline{border:1px dashed var(--line);background:transparent;color:var(--muted);width:100%;padding:11px;border-radius:10px;cursor:pointer;margin-top:10px;font-size:14px}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0}
+  .total-row .big{font-size:26px;font-weight:700}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 9px;border-radius:999px;background:#f0efe9;color:var(--muted)}
+  .chip.pro{background:#efe7dc;color:var(--warn)}
+  .stat{display:flex;gap:10px;margin:14px 0}
+  .stat .c{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .stat .c small{color:var(--muted);font-size:12px;display:block;margin-bottom:4px}
+  .stat .c b{font-size:19px;font-weight:700}
+  .thumb{height:160px;border-radius:12px;border:1px solid var(--line);background:#f0efe9 center/cover no-repeat;
+    display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;margin-bottom:12px;overflow:hidden;text-align:center;padding:12px;cursor:pointer}
+  .priv{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);border:1px solid #d4e3da;border-radius:12px;padding:13px;font-size:13px;color:#2c4a40;margin-top:14px}
+  .rec{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
+  .rec small{color:var(--muted);font-size:12.5px;display:block}
+  .menu-item{display:flex;align-items:center;gap:12px;padding:15px 2px;border-bottom:1px solid var(--line);font-size:16px;cursor:pointer;color:var(--ink)}
+  .status{font-size:13px;padding:11px 13px;border-radius:10px;margin-bottom:14px}
+  .status.ok{background:var(--accent-soft);color:#2c4a40}
+  .status.lock{background:#f3ece2;color:var(--warn)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .seg button{flex:1;padding:10px;border:0;background:var(--surface);font-size:13.5px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  label.f{font-size:13px;color:var(--muted);display:block;margin:2px 0 6px}
+  input.field{width:100%;padding:13px;border:1px solid var(--line);border-radius:10px;font-size:15px;outline:none;margin-bottom:12px}
+  input.field:focus{border-color:var(--accent)}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:-6px;margin-bottom:12px}
+  .promo{display:flex;gap:13px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}
+  .promo .logo{flex:none;width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff}
+  .promo .t{flex:1}
+  .promo .t b{display:block;font-size:15px}
+  .promo .t small{color:var(--muted);font-size:13px}
+  .promo .arr{color:var(--muted);font-size:20px}
+  .flipwrap{perspective:1200px;margin:6px 0 16px}
+  .flipcard{position:relative;width:100%;height:220px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flipcard.flip{transform:rotateY(180deg)}
+  .cface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden}
+  .cfront{background:linear-gradient(135deg,#2b3640,#1c2630 55%,#0f151b);color:#f6f5f1;border:1px solid #3a4652}
+  .cback{background:#fff;border:1px solid var(--line);transform:rotateY(180deg)}
+  .cbrand{font-size:27px;font-weight:800;letter-spacing:.02em}
+  .ctag{color:#c6c8c5;font-size:14px;margin-top:6px}
+  .cfliphint{position:absolute;bottom:12px;font-size:10.5px;color:#8b95a1;letter-spacing:.09em;text-transform:uppercase}
+  .cqr{width:148px;height:148px;image-rendering:pixelated}
+  .cnum{font-weight:700;margin-top:8px;font-size:15px;color:var(--ink)}
+  .cscan{font-size:12px;color:var(--muted);margin-top:2px}
+  .tabbar{display:flex;position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:6}
+  .tab{flex:1;border:0;background:transparent;padding:9px 2px calc(9px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);cursor:pointer}
+  .tab span{font-size:19px;line-height:1}
+  .tab.on{color:var(--accent);font-weight:600}
+  #installmodal,#trackerintro{position:fixed;inset:0;z-index:50;background:rgba(10,15,20,.55);display:none;align-items:center;justify-content:center;padding:24px}
+  #installmodal .m,#trackerintro .m{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px 22px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  #installmodal .mi,#trackerintro .mi{font-size:42px;margin-bottom:4px}
+  #installmodal .mt,#trackerintro .mt{font-size:19px;font-weight:700;margin-bottom:6px}
+  #installmodal .ms,#trackerintro .ms{color:var(--muted);font-size:14px;margin-bottom:16px}
+  #compass{position:fixed;right:16px;bottom:80px;z-index:35;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:0;font-size:23px;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(46,94,78,.45);cursor:pointer}
+  #compass:active{transform:scale(.95)}
+  #trackerpanel{position:fixed;inset:0;z-index:45;background:rgba(10,15,20,.5);display:none;align-items:flex-end;justify-content:center}
+  #trackerpanel .sheet{background:var(--surface);width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:82vh;overflow:auto}
+  #trackerpanel .th{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  #trackerpanel .th .cc{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px}
+  #trackerpanel .th b{font-size:16px;flex:1}
+  #trackerpanel .hx{color:var(--muted);font-size:13px;cursor:pointer}
+  #trackerpanel .help{font-size:15px;color:var(--ink);line-height:1.55;margin-bottom:12px}
+  #trackerpanel textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit;resize:vertical;min-height:62px;outline:none}
+  #trackerpanel textarea:focus{border-color:var(--accent)}
+  @media print{.bar,.footer,.tabbar,#installmodal,#compass,#trackerpanel,#trackerintro{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="installmodal"><div class="m"><div class="mi">📲</div><div class="mt" id="im-title"></div><div class="ms" id="im-sub"></div><button class="btn" id="im-install"></button><button class="btn sec" id="im-later" style="margin-top:8px"></button></div></div>
+<button id="compass" onclick="openTracker()" title="Compass">🧭</button>
+<div id="trackerpanel"><div class="sheet" id="tsheet"></div></div>
+<div id="trackerintro"><div class="m"><div class="mi">🧭</div><div class="mt" id="ti-title"></div><div class="ms" id="ti-sub"></div><button class="btn" id="ti-ok"></button></div></div>
+<script>
+const PHONE="0759610468";
+const WA="https://wa.me/254759610468";
+const COMMUNITY="https://chat.whatsapp.com/L73s3wMfjbQFSfAgVuzQsa";
+const PRO_URL="https://alvinmutuma2.github.io/Polaris-Pro/";
+const QR_APP="data:image/png;base64,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";
+/* === Links Polaris Pro advertises — confirm/replace with your live URLs === */
+const CFG={
+  polarisFreeUrl:"https://alvinmutuma2.github.io/Polaris/",
+  viwandaUrl:"https://alvinmutuma2.github.io/Viwanda/"
+};
+const SUPA_URL="https://bnqowljyddlubldxhjgb.supabase.co";
+const SUPA_KEY="sb_publishable_iwHN5nCoq8LU9Z20ER8SSw_G5GQ7key";
+async function rpc(fn,args){
+  const r=await fetch(SUPA_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return await r.json();
+}
+const RATE_TIMBER=120, RATE_MVULE=180;
+
+/* ================= LANGUAGE (English / Kiswahili) ================= */
+const L={
+  tagline:{en:"Clear handwriting counts.",sw:"Maandishi mazuri yanahesabika."},
+  homeLead:{en:"Keep your paper. Snap it. Polaris counts it, keeps it, and never touches your money.",sw:"Endelea na karatasi yako. Piga picha. Polaris inaihesabu, inaihifadhi, na haiguse pesa yako kamwe."},
+  newHere:{en:"New here?",sw:"Mgeni hapa?"},
+  walkthrough:{en:"Take the 15-second walkthrough.",sw:"Pitia mwongozo wa sekunde 15."},
+  showMe:{en:"Show me",sw:"Nionyeshe"},
+  door1t:{en:"Your sales, counted and kept",sw:"Mauzo yako, yamehesabiwa na kuhifadhiwa"},
+  door1s:{en:"Snap your page — Polaris totals it and keeps a clean record.",sw:"Piga picha ya ukurasa — Polaris inajumlisha na kuweka rekodi safi."},
+  door2t:{en:"Your shop, on the map",sw:"Duka lako, kwenye ramani"},
+  door2s:{en:"Recording makes you part of a network — manufacturers and shoppers reach you.",sw:"Kurekodi kunakuweka kwenye mtandao — watengenezaji na wanunuzi wanakufikia."},
+  door3t:{en:"A Sacco for your shop",sw:"Chama cha duka lako"},
+  door3s:{en:"Your records become proof — proof that unlocks stock and standing.",sw:"Rekodi zako zinakuwa uthibitisho — uthibitisho unaofungua bidhaa na heshima."},
+  recordToday:{en:"Record today's sales",sw:"Andika mauzo ya leo"},
+  privTitle:{en:"Private by design.",sw:"Faragha kwa muundo."},
+  privBody:{en:"Never touches your cash, never a paybill, never shows your numbers to anyone.",sw:"Haiguse pesa yako, hakuna paybill, haionyeshi nambari zako kwa mtu yeyote."},
+  demoNote:{en:"Demo — try everything freely. Nothing is saved to any server.",sw:"Jaribio — jaribu kila kitu bila malipo. Hakuna kinachohifadhiwa kwenye seva."},
+  tHome:{en:"Home",sw:"Nyumbani"}, tRecords:{en:"Records",sw:"Rekodi"}, tExplore:{en:"Explore",sw:"Gundua"}, tPro:{en:"Pro",sw:"Pro"}, tMore:{en:"More",sw:"Zaidi"},
+  cumulative:{en:"cumulative",sw:"jumla"},
+  recWord:{en:"records",sw:"rekodi"}, recWord1:{en:"record",sw:"rekodi"},
+  mergedAcross:{en:" · merged across branches",sw:" · imeunganishwa matawi yote"},
+  allBranches:{en:"All branches",sw:"Matawi yote"},
+  noRecords:{en:"No records yet. Snap a page to begin.",sw:"Bado hakuna rekodi. Piga picha ya ukurasa kuanza."},
+  byBranch:{en:"By branch",sw:"Kwa tawi"},
+  recordPage:{en:"Record a page",sw:"Andika ukurasa"},
+  netEyebrow:{en:"The Polaris network",sw:"Mtandao wa Polaris"},
+  netTitle:{en:"More than a notebook.",sw:"Zaidi ya daftari."},
+  netLead:{en:"Pro is the top of a stack. Here's the rest — tap to open.",sw:"Pro ni kilele cha mfumo. Hivi ndivyo vingine — gusa kufungua."},
+  polFreeT:{en:"Polaris — free",sw:"Polaris — bure"},
+  polFreeS:{en:"Just the deni book. Record debts and daily sales, free.",sw:"Daftari la deni tu. Andika madeni na mauzo ya kila siku, bure."},
+  viwandaS:{en:"List your brand. Reach every shop on Polaris.",sw:"Orodhesha bidhaa yako. Fikia kila duka kwenye Polaris."},
+  shopMapT:{en:"Your shop, on the map.",sw:"Duka lako, kwenye ramani."},
+  shopMapB:{en:"Recording here is the first step to being found — by makers on Viwanda and by shoppers near you.",sw:"Kurekodi hapa ni hatua ya kwanza ya kupatikana — na watengenezaji kwenye Viwanda na wanunuzi karibu nawe."},
+  subscription:{en:"Subscription",sw:"Usajili"},
+  proPrice:{en:"Pro — KES 3,500/mo",sw:"Pro — KES 3,500/mwezi"},
+  proLead:{en:"The private recorder: snap, total, keep, merge your branches, export. No paybill, ever.",sw:"Mrekodishaji wa faragha: piga picha, jumlisha, hifadhi, unganisha matawi, hamisha. Hakuna paybill, kamwe."},
+  proActive:{en:"Pro is active · {d} days left",sw:"Pro inatumika · siku {d} zimebaki"},
+  proExpired:{en:"Pro expired · renew to keep merging and exporting",sw:"Pro imeisha · fanya upya kuendelea kuunganisha na kuhamisha"},
+  proRowS:{en:"Recorder · branches · export",sw:"Mrekodishaji · matawi · hamisha"},
+  proPlusS:{en:"Adds verified payments",sw:"Inaongeza malipo yaliyothibitishwa"},
+  howPay:{en:"How you pay (rail-neutral)",sw:"Jinsi ya kulipa (bila njia maalum)"},
+  payBody:{en:"Send the amount to {phone} the way you already send money — your own M-Pesa, no paybill. Drop the code below; it shows in {boma} for your operator to confirm, and Pro unlocks.",sw:"Tuma kiasi kwa {phone} jinsi unavyotuma pesa kawaida — M-Pesa yako, hakuna paybill. Weka namba hapa chini; inaonekana kwenye {boma} ili msimamizi wako athibitishe, na Pro inafunguliwa."},
+  codeLabel:{en:"M-Pesa confirmation code",sw:"Namba ya uthibitisho ya M-Pesa"},
+  codeHint:{en:"Demo: any 10-character code unlocks 30 days.",sw:"Jaribio: namba yoyote ya herufi 10 inafungua siku 30."},
+  submitPay:{en:"Submit payment",sw:"Tuma malipo"},
+  notReady:{en:"Not ready to pay? Keep the free Polaris →",sw:"Bado huko tayari kulipa? Endelea na Polaris ya bure →"},
+  proPriv:{en:"Polaris owns no money rail and never pulls from your account. You pay the way you choose; we only read the code.",sw:"Polaris haimiliki njia ya pesa na haivuti kutoka akaunti yako. Unalipa jinsi unavyochagua; sisi tunasoma namba tu."},
+  moreTitle:{en:"Everything in Polaris Pro",sw:"Kila kitu katika Polaris Pro"},
+  miBranches:{en:"Branches",sw:"Matawi"}, miPrivacy:{en:"Privacy",sw:"Faragha"}, miExplore:{en:"Explore the network",sw:"Gundua mtandao"},
+  miTour:{en:"Show me how (guided tour)",sw:"Nionyeshe jinsi (mwongozo)"}, miReset:{en:"Start over",sw:"Anza upya"},
+  morePrototype:{en:"Polaris Pro · prototype. Saved on this device only, never to a server.",sw:"Polaris Pro · mfano. Imehifadhiwa kwenye kifaa hiki tu, si kwenye seva."},
+  capStep:{en:"Step 1 · Capture",sw:"Hatua 1 · Piga picha"},
+  capTitle:{en:"Snap today's page",sw:"Piga picha ya ukurasa wa leo"},
+  capLead:{en:"Snap your page — or choose a screenshot or PDF you already have. Nothing to type.",sw:"Piga picha ya ukurasa — au chagua picha au PDF uliyonayo. Hakuna cha kuandika."},
+  capPlaceholder:{en:"📷 Snap a photo — or choose a screenshot / PDF",sw:"📷 Piga picha — au chagua picha / PDF"},
+  capPriv:{en:"The photo stays on your record. It is never posted or shared.",sw:"Picha inabaki kwenye rekodi yako. Haitumwi wala kushirikiwa kamwe."},
+  next:{en:"Next",sw:"Endelea"},
+  recipeStep:{en:"Step 2 · The rule",sw:"Hatua 2 · Kanuni"},
+  recipeTitle:{en:"What should Polaris do with it?",sw:"Polaris ifanye nini nayo?"},
+  recipeLead:{en:"Pick how to read this page. Your choice is saved as your recipe.",sw:"Chagua jinsi ya kusoma ukurasa huu. Chaguo lako linahifadhiwa kama kanuni yako."},
+  rec_sales_t:{en:"Total my sales",sw:"Jumlisha mauzo yangu"}, rec_sales_s:{en:"Add up today's takings",sw:"Jumlisha mapato ya leo"},
+  rec_paidowed_t:{en:"Paid vs Owed",sw:"Imelipwa dhidi ya Deni"}, rec_paidowed_s:{en:"Pen = collected · pencil = owed",sw:"Kalamu = imekusanywa · penseli = deni"},
+  rec_timber_t:{en:"Timber tally",sw:"Hesabu ya mbao"}, rec_timber_s:{en:"L×W×H ÷12 · ×120 (mvule ×180)",sw:"U×P×K ÷12 · ×120 (mvule ×180)"},
+  rec_teach_t:{en:"Teach a new rule",sw:"Fundisha kanuni mpya"}, rec_teach_s:{en:"Tell Polaris what to do",sw:"Ambia Polaris la kufanya"},
+  teachPh:{en:"e.g. right column is price, total it, pencil means owed",sw:"mf. safu ya kulia ni bei, jumlisha, penseli maana yake deni"},
+  teachHint:{en:"You teach it once, in your own words. Polaris remembers this as your rule.",sw:"Unafundisha mara moja, kwa maneno yako. Polaris inakumbuka kama kanuni yako."},
+  reviewStep:{en:"Step 3 · Confirm",sw:"Hatua 3 · Thibitisha"},
+  reviewTitle:{en:"Read your page & enter it",sw:"Soma ukurasa wako na uandike"},
+  reviewLead:{en:"Your photo is right here — read it and type the lines. Nothing saves until you confirm.",sw:"Picha yako ipo hapa — isome na uandike mistari. Hakuna kinachohifadhiwa hadi uthibitishe."},
+  total:{en:"Total",sw:"Jumla"},
+  paidOwedT:{en:"Paid vs owed.",sw:"Imelipwa dhidi ya deni."},
+  paidOwedB:{en:"Mark each line Paid (pen = collected) or Owed (pencil = still owed). Tap to flip.",sw:"Weka kila mstari Imelipwa (kalamu = imekusanywa) au Deni (penseli = bado inadaiwa). Gusa kubadili."},
+  confirmSave:{en:"Confirm & save",sw:"Thibitisha na hifadhi"},
+  itemOrTill:{en:"Item or till",sw:"Bidhaa au till"},
+  addLine:{en:"+ Add a line",sw:"+ Ongeza mstari"},
+  addSize:{en:"+ Add a size",sw:"+ Ongeza ukubwa"},
+  mvuleQ:{en:"Mvule timber?",sw:"Mbao ya mvule?"},
+  paidTog:{en:"Paid ✒",sw:"Imelipwa ✒"}, owedTog:{en:"Owed ✎",sw:"Deni ✎"},
+  savedTitle:{en:"Today is counted.",sw:"Leo imehesabiwa."},
+  totalSales:{en:"Total sales",sw:"Jumla ya mauzo"}, value:{en:"Value",sw:"Thamani"},
+  collectedPen:{en:"Collected (pen)",sw:"Imekusanywa (kalamu)"}, owedPencil:{en:"Owed (pencil)",sw:"Deni (penseli)"},
+  boardFeet:{en:"Board feet",sw:"Board feet"},
+  makePDF:{en:"Make a PDF",sw:"Tengeneza PDF"}, shareBtn:{en:"Share",sw:"Shiriki"},
+  resultPriv:{en:"This record lives in your book only. Not shared, not reported anywhere.",sw:"Rekodi hii ipo kwenye daftari lako tu. Haishirikiwi, hairipotiwi popote."},
+  seeRecords:{en:"See all records",sw:"Ona rekodi zote"}, recordAnother:{en:"Record another page",sw:"Andika ukurasa mwingine"},
+  mgmt:{en:"Management",sw:"Usimamizi"}, yourBranches:{en:"Your branches",sw:"Matawi yako"},
+  branchesLead:{en:"Each branch records its own page. The owner sees every branch merged — cumulative and individual.",sw:"Kila tawi linarekodi ukurasa wake. Mmiliki anaona matawi yote yameunganishwa — jumla na kila moja."},
+  branchProNote:{en:"Merging many branches into one cumulative view is a Pro feature.",sw:"Kuunganisha matawi mengi kuwa mwonekano mmoja wa jumla ni kipengele cha Pro."},
+  newBranchPh:{en:"New branch name (e.g. Eastleigh stall)",sw:"Jina la tawi jipya (mf. duka la Eastleigh)"},
+  addBranch:{en:"Add branch",sw:"Ongeza tawi"}, current:{en:"current",sw:"la sasa"},
+  promise:{en:"The promise",sw:"Ahadi"}, bookYours:{en:"Your book stays yours.",sw:"Daftari lako linabaki lako."},
+  paperPaper:{en:"Your paper stays paper.",sw:"Karatasi yako inabaki karatasi."},
+  paperBody:{en:"You keep writing the way you always have. Polaris rides on top.",sw:"Unaendelea kuandika kama kawaida. Polaris inakaa juu yake."},
+  neverCash:{en:"We never touch your cash.",sw:"Hatuguse pesa yako kamwe."},
+  cashBody:{en:"No paybill, no pulling from your account. You collect money the way you choose.",sw:"Hakuna paybill, hakuna kuvuta kutoka akaunti yako. Unakusanya pesa jinsi unavyochagua."},
+  numbersPrivate:{en:"Your numbers stay private.",sw:"Nambari zako zinabaki za siri."},
+  numbersBody:{en:"Nothing is posted, sold, or reported. Your records are for you.",sw:"Hakuna kinachochapishwa, kuuzwa, au kuripotiwa. Rekodi zako ni zako."},
+  gotIt:{en:"Got it",sw:"Nimeelewa"},
+  resetConfirm:{en:"Start over? This clears the demo on this device.",sw:"Anza upya? Hii inafuta jaribio kwenye kifaa hiki."},
+  codeAlert:{en:"Enter the 10–12 character code from your M-Pesa message.",sw:"Weka namba ya herufi 10–12 kutoka ujumbe wako wa M-Pesa."},
+  paidAlert:{en:"Received. In the live version this shows in Boma as pending until your operator confirms. Demo: unlocked for 30 days.",sw:"Imepokelewa. Katika toleo halisi hii inaonekana kwenye Boma ikisubiri hadi msimamizi wako athibitishe. Jaribio: imefunguliwa kwa siku 30."},
+  copied:{en:"Copied: ",sw:"Imenakiliwa: "},
+  recPrompt:{en:"Record a page",sw:"Andika ukurasa"},
+  shareTitle:{en:"Share Polaris Pro",sw:"Shiriki Polaris Pro"},
+  tapTurn:{en:"Tap to turn · QR on the back",sw:"Gusa kugeuza · QR nyuma"},
+  scanOpen:{en:"Scan to open the app",sw:"Skani kufungua programu"},
+  shareApp:{en:"Share the app",sw:"Shiriki programu"},
+  joinComm:{en:"Join our WhatsApp community",sw:"Jiunge na jamii yetu ya WhatsApp"},
+  messageMe:{en:"Message us on WhatsApp",sw:"Tutumie ujumbe WhatsApp"},
+  shareNote:{en:"Send the link, or let them scan the card. One tap in.",sw:"Tuma kiungo, au waache waskani kadi. Mguso mmoja."},
+  miShare:{en:"Share / my card",sw:"Shiriki / kadi yangu"},
+  phoneLabel:{en:"Your shop's phone (M-Pesa number)",sw:"Namba ya simu ya duka (M-Pesa)"},
+  phonePh:{en:"07XX XXX XXX",sw:"07XX XXX XXX"},
+  sentPending:{en:"Sent ✓ Your payment is now in Boma. Once your operator confirms it, tap Check status and Pro unlocks.",sw:"Imetumwa ✓ Malipo yako yapo Boma. Msimamizi akithibitisha, gusa Angalia hali na Pro inafunguliwa."},
+  checkStatus:{en:"Check status",sw:"Angalia hali"},
+  waitingConfirm:{en:"Waiting for your operator to confirm in Boma…",sw:"Inasubiri msimamizi athibitishe kwenye Boma…"},
+  phoneAlert:{en:"Enter a valid phone (e.g. 0712345678).",sw:"Weka namba sahihi (mf. 0712345678)."},
+  needLive:{en:"Couldn't reach the server. This works on the live site, not the preview.",sw:"Imeshindwa kufikia seva. Hii inafanya kazi kwenye tovuti halisi, si onyesho hili."},
+  proUnlocked:{en:"Pro is active 🎉",sw:"Pro imewashwa 🎉"},
+  notConfirmed:{en:"Not confirmed yet — check again shortly.",sw:"Haijathibitishwa bado — angalia tena baadaye."},
+  trkIntroTitle:{en:"Meet your compass 🧭",sw:"Kutana na dira yako 🧭"},
+  trkIntroSub:{en:"I'm here to help you around the app. Tap the compass on any screen and I'll guide you — and you can tell me what's confusing, anytime.",sw:"Nipo kukusaidia ndani ya programu. Gonga dira kwenye skrini yoyote nikuongoze — na unaweza kuniambia kinachokuchanganya, wakati wowote."},
+  trkTitle:{en:"Your compass",sw:"Dira yako"},
+  trkClose:{en:"Close",sw:"Funga"},
+  trkTell:{en:"Tell me",sw:"Niambie"},
+  trkFbPh:{en:"Stuck on something? Suggest an improvement?",sw:"Umekwama? Pendekeza kitu?"},
+  trkSend:{en:"Send",sw:"Tuma"},
+  trkThanks:{en:"Asante 🙏 Noted — it goes straight to the team.",sw:"Asante 🙏 Imepokelewa — inaenda kwa timu moja kwa moja."},
+  trkSilence:{en:"Silence the compass",sw:"Nyamazisha dira"}
+};
+const RECIPES={sales:{icon:"Σ"},paidowed:{icon:"✎"},timber:{icon:"▤"},teach:{icon:"✦"}};
+const BLANK={screen:"home",hist:[],lang:"en",pro:false,paidThrough:null,
+  branches:[{id:"b1",name:"Main shop"}],branch:"b1",records:[],draft:null,recipeChoice:null,teachText:""};
+let S=load();
+const TOP=["home","records","explore","pro","more"];
+
+function load(){try{const r=JSON.parse(localStorage.getItem("pp_state"));const st=r&&r.branches?r:structuredClone(BLANK);if(!st.lang)st.lang="en";return st;}catch(e){return structuredClone(BLANK);}}
+function save(){localStorage.setItem("pp_state",JSON.stringify(S));}
+function t(k){const o=L[k];if(o==null)return k;return o[S.lang]||o.en;}
+function toggleLang(){S.lang=S.lang==="sw"?"en":"sw";save();render();}
+function go(sc){S.hist.push(S.screen);S.screen=sc;save();render();}
+function goTab(id){S.screen=id;S.hist=[];save();render();}
+function back(){S.screen=S.hist.pop()||"home";save();render();}
+function reset(){if(confirm(t("resetConfirm"))){const lang=S.lang;S=structuredClone(BLANK);S.lang=lang;save();render();}}
+function money(n){return "KES "+Math.round(n||0).toLocaleString();}
+function todayStr(){return new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short"});}
+function daysLeft(){if(!S.paidThrough)return 0;return Math.ceil((new Date(S.paidThrough)-new Date())/86400000);}
+function isLive(){return S.pro&&daysLeft()>0;}
+function branchName(id){const b=S.branches.find(x=>x.id===id);return b?b.name:"—";}
+function openLink(u){window.open(u,"_blank","noopener");}
+function recName(k){return t("rec_"+k+"_t");}
+
+function sampleLines(recipe){
+  if(recipe==="timber")return[{label:"4x2x12",L:4,W:2,H:12},{label:"6x1x10",L:6,W:1,H:10},{label:"2x2x14",L:2,W:2,H:14}];
+  if(recipe==="paidowed")return[{label:"Unga 2kg",amount:540,kind:"pen"},{label:"Mafuta 1L",amount:320,kind:"pen"},{label:"Sukari 2kg (Mama Njeri)",amount:280,kind:"pencil"},{label:"Mkate + maziwa",amount:170,kind:"pen"}];
+  return[{label:"Till asubuhi",amount:3150,kind:"pen"},{label:"Till mchana",amount:2680,kind:"pen"},{label:"Till jioni",amount:1940,kind:"pen"}];
+}
+function bf(r){return Math.trunc(((+r.L||0)*(+r.W||0)*(+r.H||0))/12);}
+function draftTotals(){
+  const d=S.draft;if(!d)return{total:0,collected:0,owed:0,bfeet:0};
+  if(d.recipe==="timber"){let feet=d.lines.reduce((s,r)=>s+bf(r),0)+(d.extraBf||0);const rate=d.mvule?RATE_MVULE:RATE_TIMBER;return{bfeet:feet,total:feet*rate,collected:0,owed:0};}
+  let total=0,collected=0,owed=0;d.lines.forEach(l=>{const a=+l.amount||0;total+=a;if(l.kind==="pencil")owed+=a;else collected+=a;});
+  return{total,collected,owed,bfeet:0};
+}
+
+function langBtn(){return `<button class="lang" onclick="toggleLang()">${S.lang==="sw"?"ENG":"SWA"}</button>`;}
+function topbar(title,opts={}){
+  const b=opts.noback?'<div class="ico ghost"></div>':'<div class="ico" onclick="back()">←</div>';
+  const sh=opts.share===false?'':`<div class="ico" onclick="go('share')" title="Share">📤</div>`;
+  return `<div class="bar">${b}<h1>${title}</h1>${sh}${langBtn()}</div>`;
+}
+function tabbar(){
+  const tb=(id,ic,lb)=>`<button class="tab ${S.screen===id?'on':''}" onclick="goTab('${id}')"><span>${ic}</span>${lb}</button>`;
+  return `<div class="tabbar">${tb('home','⌂',t('tHome'))}${tb('records','≡',t('tRecords'))}${tb('explore','◎',t('tExplore'))}${tb('pro','★',t('tPro'))}${tb('more','⋯',t('tMore'))}</div>`;
+}
+
+/* ---- top-level pages ---- */
+function page_home(){
+  const prompt=(!S.seenTour)?`<div class="card" style="border-color:#d4e3da;background:var(--accent-soft)"><div class="door" style="align-items:center"><div class="n">▶</div><div style="flex:1"><b>${t('newHere')}</b><span style="color:#2c4a40">${t('walkthrough')}</span></div><button class="toggle pen" onclick="tourStart()">${t('showMe')}</button></div></div>`:'';
+  return `<main>
+    <p class="eyebrow">Polaris Pro</p>
+    <h2>${t('tagline')}</h2>
+    <p class="lead">${t('homeLead')}</p>
+    ${prompt}
+    <div class="card"><div class="door"><div class="n">1</div><div><b>${t('door1t')}</b><span>${t('door1s')}</span></div></div></div>
+    <div class="card"><div class="door"><div class="n">2</div><div><b>${t('door2t')}</b><span>${t('door2s')}</span></div></div></div>
+    <div class="card"><div class="door"><div class="n">3</div><div><b>${t('door3t')}</b><span>${t('door3s')}</span></div></div></div>
+    <button class="btn" onclick="go('capture')">${t('recordToday')}</button>
+    <div class="priv"><div>🔒</div><div><b>${t('privTitle')}</b> ${t('privBody')}</div></div>
+    <p class="hint" style="text-align:center;margin-top:16px">${t('demoNote')}</p>
+  </main>`;
+}
+function page_records(){
+  const list=S.records.filter(r=>S._all||r.branch===S.branch);
+  const cum=list.reduce((s,r)=>s+r.total,0);
+  const multi=S.branches.length>1;
+  const seg=multi?`<div class="seg"><button class="${!S._all?'on':''}" onclick="S._all=false;save();render()">${branchName(S.branch)}</button><button class="${S._all?'on':''}" onclick="S._all=true;save();render()">${t('allBranches')}</button></div>`:'';
+  const rows=list.length?list.map(r=>`<div class="rec"><div>${branchName(r.branch)} · ${r.date}<small>${recName(r.recipe)}</small></div><div class="num">${money(r.total)}</div></div>`).join(""):`<p class="lead" style="margin-top:14px">${t('noRecords')}</p>`;
+  let per="";
+  if(S._all&&multi){per=`<p class="eyebrow" style="margin-top:18px">${t('byBranch')}</p>`;S.branches.forEach(b=>{const bt=S.records.filter(r=>r.branch===b.id).reduce((s,r)=>s+r.total,0);per+=`<div class="rec"><div>${b.name}</div><div class="num">${money(bt)}</div></div>`;});}
+  const label=list.length===1?t('recWord1'):t('recWord');
+  return `<main>
+    <p class="eyebrow">${S._all?t('allBranches'):branchName(S.branch)} · ${t('cumulative')}</p>
+    <h2 class="num">${money(cum)}</h2>
+    <p class="lead">${list.length} ${label}${S._all&&multi?t('mergedAcross'):''}</p>
+    ${seg}<div class="card" style="padding:4px 16px">${rows}</div>${per}
+    <button class="btn" onclick="go('capture')" style="margin-top:14px">${t('recordPage')}</button>
+  </main>`;
+}
+function page_explore(){
+  return `<main>
+    <p class="eyebrow">${t('netEyebrow')}</p>
+    <h2>${t('netTitle')}</h2>
+    <p class="lead">${t('netLead')}</p>
+    <div class="promo" onclick="openLink(CFG.polarisFreeUrl)">
+      <div class="logo" style="background:#1c2630">P</div>
+      <div class="t"><b>${t('polFreeT')}</b><small>${t('polFreeS')}</small></div><div class="arr">→</div></div>
+    <div class="promo" onclick="openLink(CFG.viwandaUrl)">
+      <div class="logo" style="background:#2e5e4e">V</div>
+      <div class="t"><b>Viwanda</b><small>${t('viwandaS')}</small></div><div class="arr">→</div></div>
+    <div class="priv"><div>◎</div><div><b>${t('shopMapT')}</b> ${t('shopMapB')}</div></div>
+  </main>`;
+}
+function page_pro(){
+  const status=isLive()?`<div class="status ok">${t('proActive').replace('{d}',daysLeft())}</div>`:(S.proPhone?`<div class="status lock">${t('waitingConfirm')}</div>`:'');
+  const payBody=t('payBody').replace('{phone}',`<b class="num" style="color:var(--ink)">${PHONE}</b>`).replace('{boma}',`<b style="color:var(--ink)">Boma</b>`);
+  const tier=S.proTier||'pro';
+  return `<main>
+    <p class="eyebrow">${t('subscription')}</p>
+    <h2>${t('proPrice')}</h2>
+    <p class="lead">${t('proLead')}</p>
+    ${status}
+    <div class="seg" style="margin-bottom:12px">
+      <button class="${tier==='pro'?'on':''}" onclick="S.proTier='pro';save();render()">Pro · 3,500</button>
+      <button class="${tier==='proplus'?'on':''}" onclick="S.proTier='proplus';save();render()">Pro+ · 5,000</button>
+    </div>
+    <div class="card" style="font-size:13.5px;color:var(--muted)">${tier==='pro'?t('proRowS'):t('proPlusS')}</div>
+    <p class="eyebrow" style="margin-top:12px">${t('howPay')}</p>
+    <div class="card" style="font-size:14px;color:var(--muted)">${payBody}</div>
+    <label class="f" style="margin-top:12px">${t('phoneLabel')}</label>
+    <input class="field" id="pphone" placeholder="${t('phonePh')}" value="${S.proPhone||''}" inputmode="tel">
+    <label class="f">${t('codeLabel')}</label>
+    <input class="field" id="code" placeholder="TJ9K2M4XQ1" maxlength="12" style="text-transform:uppercase">
+    <button class="btn" onclick="submitPay()">${t('submitPay')}</button>
+    ${S.proPhone?`<button class="btn sec" onclick="checkPro(false)" style="margin-top:8px">${t('checkStatus')}</button>`:''}
+    <button class="btn sec" onclick="openLink(CFG.polarisFreeUrl)" style="margin-top:8px">${t('notReady')}</button>
+    <div class="priv"><div>🔒</div><div>${t('proPriv')}</div></div>
+  </main>`;
+}
+function page_more(){
+  const items=[["▤",t('recPrompt'),"capture"],["📤",t('miShare'),"share"],["⌂",t('miBranches'),"branches"],["🔒",t('miPrivacy'),"privacy"],["◎",t('miExplore'),"explore"]]
+    .map(([i,lab,s])=>`<div class="menu-item" onclick="go('${s}')"><span>${i}</span>${lab}</div>`).join("");
+  return `<main>
+    <p class="eyebrow">${t('tMore')}</p><h2>${t('moreTitle')}</h2>
+    ${items}
+    <div class="menu-item" onclick="tourStart()"><span>▶</span>${t('miTour')}</div>
+    <div class="menu-item" onclick="reset()" style="color:var(--warn)"><span>↺</span>${t('miReset')}</div>
+    <p class="lead" style="margin-top:20px;font-size:13px">${t('morePrototype')}</p>
+  </main>`;
+}
+
+/* ---- flow screens ---- */
+function screen_capture(){
+  const has=S.draft&&(S.draft.photoData||S.draft.photoName);
+  const style=(S.draft&&S.draft.photoData)?`style="background-image:url('${S.draft.photoData}')"`:"";
+  const inside=has?(S.draft.photoData?'':'📄 '+S.draft.photoName):t('capPlaceholder');
+  return topbar(t('capTitle'))+`<main>
+    <p class="eyebrow">${t('capStep')}</p><h2>${t('capTitle')}</h2>
+    <p class="lead">${t('capLead')}</p>
+    <label class="thumb" for="pic" ${style}>${inside}</label>
+    <input id="pic" type="file" accept="image/*,application/pdf" style="display:none" onchange="onPic(event)">
+    <div class="priv"><div>🔒</div><div>${t('capPriv')}</div></div>
+  </main><div class="footer"><button class="btn" ${has?'':'disabled'} onclick="go('recipe')">${t('next')}</button></div>`;
+}
+function onPic(e){const f=e.target.files[0];if(!f)return;S.draft=S.draft||{};S.draft.photoName=f.name||"page";
+  if(f.type&&f.type.indexOf("image")===0){const rd=new FileReader();rd.onload=()=>{S.draft.photoData=rd.result;save();render();};rd.readAsDataURL(f);}
+  else{S.draft.photoData=null;save();render();}}
+function screen_recipe(){
+  const rows=Object.keys(RECIPES).map(k=>`<button class="opt ${S.recipeChoice===k?'sel':''}" onclick="pickRecipe('${k}')"><div class="k">${RECIPES[k].icon}</div><div class="t">${t('rec_'+k+'_t')}<small>${t('rec_'+k+'_s')}</small></div></button>`).join("");
+  const teach=S.recipeChoice==="teach"?`<input class="field" style="margin-top:6px" placeholder="${t('teachPh')}" value="${(S.teachText||'').replace(/"/g,'&quot;')}" oninput="S.teachText=this.value;save()"><p class="hint">${t('teachHint')}</p>`:"";
+  return topbar(t('recipeTitle'))+`<main>
+    <p class="eyebrow">${t('recipeStep')}</p><h2>${t('recipeTitle')}</h2>
+    <p class="lead">${t('recipeLead')}</p>${rows}${teach}
+  </main><div class="footer"><button class="btn" ${S.recipeChoice?'':'disabled'} onclick="startReview()">${t('next')}</button></div>`;
+}
+function pickRecipe(k){S.recipeChoice=k;save();render();}
+function startReview(){const r=S.recipeChoice;S.draft=S.draft||{};S.draft.recipe=r;S.draft.mvule=false;S.draft.extraBf=0;S.draft.lines=(r==="timber")?[{label:"",L:"",W:"",H:""}]:[{label:"",amount:"",kind:"pen"}];save();go("review");}
+function screen_review(){
+  const d=S.draft,tt=draftTotals();let body;
+  if(d.recipe==="timber"){
+    body=d.lines.map((r,i)=>`<div class="line"><input class="lbl" placeholder="4x2x12" value="${r.label}" oninput="setT(${i},'label',this.value)"><input class="amt num" style="width:46px" placeholder="U" value="${r.L}" onchange="setT(${i},'L',this.value)"><input class="amt num" style="width:46px" placeholder="P" value="${r.W}" onchange="setT(${i},'W',this.value)"><input class="amt num" style="width:46px" placeholder="K" value="${r.H}" onchange="setT(${i},'H',this.value)"><span class="chip num">${bf(r)} bf</span></div>`).join("");
+    body+=`<div class="line"><span style="flex:1;color:var(--muted);font-size:13px">${t('mvuleQ')}</span><button class="toggle ${d.mvule?'pen':'pencil'}" onclick="S.draft.mvule=!S.draft.mvule;save();render()">${d.mvule?'Mvule ·180':'·120'}</button></div>`;
+    body+=`<button class="addline" onclick="addTimber()">${t('addSize')}</button>`;
+  }else{
+    body=d.lines.map((l,i)=>`<div class="line"><input class="lbl" placeholder="${t('itemOrTill')}" value="${l.label}" oninput="setL(${i},'label',this.value)"><input class="amt num" placeholder="0" value="${l.amount}" onchange="setL(${i},'amount',this.value)">${d.recipe==="paidowed"?`<button class="toggle ${l.kind==='pencil'?'pencil':'pen'}" onclick="flip(${i})">${l.kind==='pencil'?t('owedTog'):t('paidTog')}</button>`:''}</div>`).join("");
+    body+=`<button class="addline" onclick="addLine()">${t('addLine')}</button>`;
+  }
+  const tl=d.recipe==="timber"?`${tt.bfeet} bf → ${money(tt.total)}`:money(tt.total);
+  const pic=(d.photoData)?`<img src="${d.photoData}" style="width:100%;border-radius:12px;border:1px solid var(--line);margin-bottom:12px;max-height:220px;object-fit:cover">`:'';
+  return topbar(t('reviewTitle'))+`<main>
+    <p class="eyebrow">${t('reviewStep')}</p><h2>${t('reviewTitle')}</h2>
+    <p class="lead">${t('reviewLead')}</p>
+    ${pic}
+    <div class="card">${body}<div class="total-row"><span class="chip">${t('total')}</span><span class="big num">${tl}</span></div></div>
+    ${d.recipe==="paidowed"?`<div class="priv"><div>✎</div><div><b>${t('paidOwedT')}</b> ${t('paidOwedB')}</div></div>`:''}
+  </main><div class="footer"><button class="btn" onclick="saveRecord()">${t('confirmSave')}</button></div>`;
+}
+function setL(i,k,v){S.draft.lines[i][k]=k==='amount'?(+v||0):v;save();render();}
+function flip(i){const l=S.draft.lines[i];l.kind=l.kind==='pencil'?'pen':'pencil';save();render();}
+function addLine(){S.draft.lines.push({label:"",amount:"",kind:"pen"});save();render();}
+function addTimber(){S.draft.lines.push({label:"",L:"",W:"",H:""});save();render();}
+function setT(i,k,v){S.draft.lines[i][k]=k==='label'?v:(+v||0);save();render();}
+function saveRecord(){const tt=draftTotals();S.records.unshift({id:"r"+Date.now(),date:todayStr(),branch:S.branch,recipe:S.draft.recipe,total:tt.total,collected:tt.collected,owed:tt.owed,bfeet:tt.bfeet,photo:S.draft.photoData||null});S.draft=null;S.recipeChoice=null;save();go("result");}
+function screen_result(){
+  const r=S.records[0];if(!r){S.screen="records";return render();}
+  const proTag=isLive()?'':'<span class="chip pro">Pro</span>';
+  return topbar(t('savedTitle'))+`<main>
+    <p class="eyebrow">${branchName(r.branch)} · ${r.date}</p><h2>${t('savedTitle')}</h2>
+    ${r.photo?`<img src="${r.photo}" style="width:100%;border-radius:12px;border:1px solid var(--line);margin-bottom:12px;max-height:200px;object-fit:cover">`:''}
+    <div class="card"><div class="total-row"><span>${r.recipe==='timber'?t('value'):t('totalSales')}</span><span class="big num">${money(r.total)}</span></div></div>
+    ${r.recipe!=='timber'?`<div class="stat"><div class="c"><small>${t('collectedPen')}</small><b class="num" style="color:var(--pen)">${money(r.collected)}</b></div><div class="c"><small>${t('owedPencil')}</small><b class="num" style="color:var(--pencil)">${money(r.owed)}</b></div></div>`:`<div class="card"><div class="total-row"><span>${t('boardFeet')}</span><span class="num">${r.bfeet} bf</span></div></div>`}
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn sec" style="margin-top:0" onclick="shareRecord()">📤 ${t('shareBtn')}</button>
+      <button class="btn sec" style="margin-top:0" onclick="makePDF()">🖨 ${t('makePDF')} ${proTag}</button>
+    </div>
+    <div class="priv"><div>🔒</div><div>${t('resultPriv')}</div></div>
+  </main><div class="footer"><button class="btn" onclick="goTab('records')">${t('seeRecords')}</button><button class="btn sec" onclick="go('capture')" style="margin-top:8px">${t('recordAnother')}</button></div>`;
+}
+function shareRecord(){
+  const r=S.records[0];if(!r)return;
+  let txt="Polaris — "+(S.lang==="sw"?"mauzo ":"sales ")+r.date+": "+money(r.total);
+  if(r.recipe!=='timber')txt+=" ("+t('collectedPen')+": "+money(r.collected)+", "+t('owedPencil')+": "+money(r.owed)+")";
+  if(navigator.share){navigator.share({title:"Polaris Pro",text:txt}).catch(()=>{});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>alert(t('copied')+txt));}
+  else{alert(txt);}
+}
+function makePDF(){if(!isLive()){goTab('pro');return;}window.print();}
+function screen_branches(){
+  const rows=S.branches.map(b=>`<div class="rec"><div onclick="S.branch='${b.id}';S._all=false;save();render()" style="cursor:pointer">${b.name} ${S.branch===b.id?`<span class="chip">${t('current')}</span>`:''}</div></div>`).join("");
+  const note=isLive()?'':`<div class="status lock">${t('branchProNote')}</div>`;
+  return topbar(t('miBranches'))+`<main><p class="eyebrow">${t('mgmt')}</p><h2>${t('yourBranches')}</h2>
+    <p class="lead">${t('branchesLead')}</p>${note}
+    <div class="card" style="padding:4px 16px">${rows}</div>
+    <input class="field" id="bn" placeholder="${t('newBranchPh')}" style="margin-top:14px">
+  </main><div class="footer"><button class="btn" onclick="addBranch()">${t('addBranch')}</button></div>`;
+}
+function addBranch(){const v=(document.getElementById("bn").value||"").trim();if(!v)return;S.branches.push({id:"b"+Date.now(),name:v});save();render();}
+function screen_privacy(){
+  return topbar(t('miPrivacy'))+`<main><p class="eyebrow">${t('promise')}</p><h2>${t('bookYours')}</h2>
+    <div class="card">✒ <b>${t('paperPaper')}</b><br><span style="color:var(--muted);font-size:14px">${t('paperBody')}</span></div>
+    <div class="card">💵 <b>${t('neverCash')}</b><br><span style="color:var(--muted);font-size:14px">${t('cashBody')}</span></div>
+    <div class="card">🙈 <b>${t('numbersPrivate')}</b><br><span style="color:var(--muted);font-size:14px">${t('numbersBody')}</span></div>
+  </main><div class="footer"><button class="btn" onclick="back()">${t('gotIt')}</button></div>`;
+}
+async function submitPay(){
+  const phone=(document.getElementById("pphone").value||"").replace(/\s/g,"").trim();
+  const code=(document.getElementById("code").value||"").trim().toUpperCase();
+  if(!/^(?:\+?254|0)(7|1)\d{8}$/.test(phone)){alert(t('phoneAlert'));return;}
+  if(!/^[A-Z0-9]{10,12}$/.test(code)){alert(t('codeAlert'));return;}
+  try{
+    await rpc('pro_request',{p_phone:phone,p_tier:(S.proTier||'pro'),p_code:code});
+    S.proPhone=phone;save();alert(t('sentPending'));render();
+  }catch(e){alert(t('needLive'));}
+}
+async function checkPro(silent){
+  if(!S.proPhone)return;
+  try{
+    const rows=await rpc('pro_status',{p_phone:S.proPhone});
+    const row=(Array.isArray(rows)&&rows.length)?rows[0]:null;
+    if(row&&row.active){S.pro=true;S.paidThrough=row.paid_through;save();render();if(!silent)alert(t('proUnlocked'));}
+    else{if(!silent)alert(t('notConfirmed'));}
+  }catch(e){if(!silent)alert(t('needLive'));}
+}
+function screen_share(){
+  return topbar(t('shareTitle'),{share:false})+`<main>
+    <div class="flipwrap" onclick="this.querySelector('.flipcard').classList.toggle('flip')">
+      <div class="flipcard">
+        <div class="cface cfront">
+          <div class="cbrand">Polaris Pro</div>
+          <div class="ctag">${t('tagline')}</div>
+          <div class="cfliphint">${t('tapTurn')}</div>
+        </div>
+        <div class="cface cback">
+          <img src="${QR_APP}" class="cqr" alt="QR">
+          <div class="cnum">+254 759 610 468</div>
+          <div class="cscan">${t('scanOpen')}</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn" onclick="shareApp()">📤 ${t('shareApp')}</button>
+    <button class="btn sec" onclick="openLink(COMMUNITY)" style="margin-top:8px">💬 ${t('joinComm')}</button>
+    <button class="btn sec" onclick="openLink(WA)" style="margin-top:8px">${t('messageMe')}</button>
+    <div class="priv"><div>↗</div><div>${t('shareNote')}</div></div>
+  </main>`;
+}
+function shareApp(){
+  const txt=(S.lang==='sw'?'Jaribu Polaris Pro — andika mauzo ya duka lako: ':'Try Polaris Pro — record your shop sales: ')+PRO_URL;
+  if(navigator.share){navigator.share({title:'Polaris Pro',text:txt,url:PRO_URL}).catch(()=>{});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>alert(t('copied')+txt));}
+  else alert(txt);
+}
+
+/* ---- guided tour ---- */
+const TOUR=[
+  {s:'home',en:"Welcome 👋 This is Polaris Pro. Let me walk you through the whole thing — about 15 seconds.",sw:"Karibu 👋 Hii ni Polaris Pro. Nikuonyeshe kila kitu — sekunde 15 hivi."},
+  {s:'home',en:"Everything lives in these 5 tabs at the bottom: Home, Records, Explore, Pro, More. Tap any, anytime.",sw:"Kila kitu kiko kwenye vichupo 5 hapa chini: Nyumbani, Rekodi, Gundua, Pro, Zaidi. Gusa chochote, wakati wowote."},
+  {s:'capture',en:"To record a day, snap a photo of your paper page. I've dropped a sample page in for you.",sw:"Kurekodi siku, piga picha ya ukurasa wako. Nimeweka ukurasa wa mfano kwa ajili yako.",setup(){S.draft={photoName:'sample page (demo)',photoData:null};}},
+  {s:'recipe',en:"Then tell Polaris what to do with it. I picked 'Total my sales' — but you choose.",sw:"Kisha ambia Polaris la kufanya nayo. Nimechagua 'Jumlisha mauzo' — lakini wewe chagua.",setup(){S.recipeChoice='sales';}},
+  {s:'review',en:"Last step: check the numbers, then tap Confirm & save. Ready to try it yourself?",sw:"Hatua ya mwisho: angalia nambari, kisha gusa Thibitisha na hifadhi. Uko tayari kujaribu mwenyewe?",setup(){S.draft=S.draft||{};S.draft.recipe='sales';S.draft.lines=sampleLines('sales');S.draft.mvule=false;},last:true}
+];
+function tourStart(){S.seenTour=true;S.tour={active:true,step:0};applyTour();}
+function applyTour(){const st=TOUR[S.tour.step];if(st.setup)st.setup();S.screen=st.s;save();render();}
+function tourNext(){if(TOUR[S.tour.step].last){S.tour.active=false;save();render();return;}S.tour.step++;applyTour();}
+function tourSkip(){S.tour.active=false;S.draft=null;S.recipeChoice=null;S.screen='home';save();render();}
+function tourOverlay(){
+  if(!S.tour||!S.tour.active)return '';
+  const st=TOUR[S.tour.step],last=st.last,txt=st[S.lang]||st.en;
+  return `<div style="position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;pointer-events:none">
+   <div style="max-width:440px;width:100%;padding:16px;pointer-events:auto">
+    <div style="background:var(--ink);color:#fff;border-radius:14px;padding:15px 16px 13px;box-shadow:0 8px 30px rgba(0,0,0,.25)">
+      <div style="font-size:11px;letter-spacing:.1em;opacity:.55;margin-bottom:6px">${S.lang==='sw'?'MWONGOZO':'GUIDE'} · ${S.tour.step+1}/${TOUR.length}</div>
+      <div style="font-size:15px;line-height:1.5;margin-bottom:12px">${txt}</div>
+      <div style="display:flex;gap:10px">
+        <button onclick="tourSkip()" style="flex:none;background:transparent;border:1px solid #3a4652;color:#cdd3da;border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer">${S.lang==='sw'?'Ruka':'Skip'}</button>
+        <button onclick="tourNext()" style="flex:1;background:#fff;color:var(--ink);border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:600;cursor:pointer">${last?(S.lang==='sw'?'Sawa — zamu yangu':'Got it — my turn'):(S.lang==='sw'?'Endelea':'Next')}</button>
+      </div>
+    </div></div></div>`;
+}
+/* ---- the compass (tracker): helps first, then leads; captures voice to Boma ---- */
+const TRK={
+  home:{help:{en:"This is home. Tap ‘Record today’s sales’ to snap your page — Polaris counts it for you. No typing.",sw:"Hii ni nyumbani. Gonga ‘Andika mauzo ya leo’ upige picha ya ukurasa — Polaris inakuhesabia. Hakuna kuandika."},lead:{en:"See the whole network",sw:"Ona mtandao wote"},act:function(){goTab('explore');}},
+  records:{help:{en:"Every day you record lands here and adds up. Add a branch and Polaris merges them — each one and the total.",sw:"Kila siku unayorekodi inakuja hapa inajumlika. Ongeza tawi na Polaris inaunganisha — kila moja na jumla."},lead:{en:"Merge branches with Pro",sw:"Unganisha matawi na Pro"},act:function(){goTab('pro');}},
+  explore:{help:{en:"The network: free Polaris and Viwanda. Tap a card to open it — this is how shops and makers find each other.",sw:"Mtandao: Polaris ya bure na Viwanda. Gonga kadi kuifungua — hapa ndipo maduka na watengenezaji wanapatana."},lead:null},
+  pro:{help:{en:"Pick a plan, enter your phone and the M-Pesa code you paid with. Your operator confirms it in Boma, then Pro unlocks. We never touch your money.",sw:"Chagua mpango, weka simu na namba ya M-Pesa uliyolipia. Msimamizi anathibitisha Boma, kisha Pro inafunguka. Hatuguse pesa yako."},lead:null},
+  capture:{help:{en:"Snap your paper page, or pick a screenshot or PDF you already have. Then you tell Polaris what to do with it.",sw:"Piga picha ya ukurasa, au chagua picha au PDF uliyonayo. Kisha unaambia Polaris la kufanya nayo."},lead:null},
+  review:{help:{en:"Read your page and type the lines next to the photo. Mark each paid or owed. Nothing saves until you confirm.",sw:"Soma ukurasa uandike mistari karibu na picha. Weka kila mmoja imelipwa au deni. Hakuna kinachohifadhiwa hadi uthibitishe."},lead:null},
+  "default":{help:{en:"I’m your compass. Tap me on any screen and I’ll tell you what it does and what to do next.",sw:"Mimi ni dira yako. Nigonge kwenye skrini yoyote nikueleze inafanya nini na la kufuata."},lead:null}
+};
+var trackerEnabled=true;
+function compassEligible(){return trackerEnabled && !S.trackerOff && !(S.tour&&S.tour.active);}
+function refreshCompass(){var c=document.getElementById('compass');if(c)c.style.display=compassEligible()?'flex':'none';}
+function trkFor(sc){return TRK[sc]||TRK["default"];}
+function openTracker(){
+  var p=document.getElementById('trackerpanel'),sh=document.getElementById('tsheet');if(!p||!sh)return;
+  var info=trkFor(S.screen),sw=(S.lang==='sw');
+  var help=info.help?(sw?info.help.sw:info.help.en):'';
+  var lead=info.lead?('<button class="btn" style="margin-top:2px" onclick="trkLead()">'+(sw?info.lead.sw:info.lead.en)+'</button>'):'';
+  window._trkLead=info.act||null;
+  sh.innerHTML='<div class="th"><div class="cc">🧭</div><b>'+t('trkTitle')+'</b><span class="hx" onclick="closeTracker()">'+t('trkClose')+'</span></div>'
+    +'<div class="help">'+help+'</div>'+lead
+    +'<label class="f" style="margin-top:14px">'+t('trkTell')+'</label>'
+    +'<textarea id="trkfb" placeholder="'+t('trkFbPh')+'"></textarea>'
+    +'<button class="btn" style="margin-top:8px" onclick="sendTrk()">'+t('trkSend')+'</button>'
+    +'<div style="text-align:center;margin-top:12px"><span class="hx" onclick="silenceCompass()">'+t('trkSilence')+'</span></div>';
+  p.style.display='flex';
+}
+function closeTracker(){var p=document.getElementById('trackerpanel');if(p)p.style.display='none';}
+function trkLead(){closeTracker();if(window._trkLead)window._trkLead();}
+function sendTrk(){
+  var v=(document.getElementById('trkfb').value||'').trim();if(!v)return;
+  try{rpc('tracker_note',{p_app:'polaris-pro',p_screen:S.screen,p_kind:'suggestion',p_body:v,p_phone:S.proPhone||null}).catch(function(){});}catch(e){}
+  closeTracker();alert(t('trkThanks'));
+}
+function silenceCompass(){S.trackerOff=true;save();closeTracker();refreshCompass();}
+function showTrackerIntro(){
+  if(S.seenTracker||!compassEligible())return;
+  var m=document.getElementById('trackerintro');if(!m)return;
+  document.getElementById('ti-title').textContent=t('trkIntroTitle');
+  document.getElementById('ti-sub').textContent=t('trkIntroSub');
+  var ok=document.getElementById('ti-ok');ok.textContent=t('gotIt');
+  ok.onclick=function(){S.seenTracker=true;save();m.style.display='none';refreshCompass();};
+  m.style.display='flex';
+}
+
+function render(){
+  const flow={capture:screen_capture,recipe:screen_recipe,review:screen_review,result:screen_result,branches:screen_branches,privacy:screen_privacy,share:screen_share};
+  const top={home:page_home,records:page_records,explore:page_explore,pro:page_pro,more:page_more};
+  let html;
+  if(TOP.includes(S.screen)){html=topbar("Polaris Pro",{noback:true})+top[S.screen]()+tabbar();}
+  else{html=(flow[S.screen]||page_home)();}
+  document.getElementById("app").innerHTML=html+tourOverlay();window.scrollTo(0,0);
+  refreshCompass();
+}
+render();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+
+/* ---- install nudge (keeps popping until installed) ---- */
+var deferredPrompt=null;
+function isStandalone(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+function installEligible(){return !isStandalone() && !localStorage.getItem('pp_installed') && !(S.tour&&S.tour.active);}
+function showInstallModal(){
+  if(!installEligible())return;
+  var m=document.getElementById('installmodal');if(!m)return;
+  var sw=(S.lang==='sw');
+  document.getElementById('im-title').textContent=sw?'Sakinisha Polaris Pro':'Install Polaris Pro';
+  document.getElementById('im-sub').textContent=sw?'Iweke kwenye skrini yako kama programu — inafunguka haraka, hata bila mtandao.':'Add it to your home screen like an app — opens fast, even offline.';
+  var ib=document.getElementById('im-install');ib.textContent=sw?'Sakinisha sasa':'Install now';ib.onclick=installClick;
+  var lb=document.getElementById('im-later');lb.textContent=sw?'Baadaye':'Not now';lb.onclick=function(){m.style.display='none';};
+  m.style.display='flex';
+}
+function hideInstallModal(){var m=document.getElementById('installmodal');if(m)m.style.display='none';}
+function installClick(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(c){if(c&&c.outcome==='accepted'){localStorage.setItem('pp_installed','1');hideInstallModal();}deferredPrompt=null;});}
+  else{alert((S.lang==='sw')?'Fungua kwenye Chrome → menyu (⋮) → Sakinisha programu / Ongeza kwenye skrini':'Open in Chrome → menu (⋮) → Install app / Add to Home screen');}
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;showInstallModal();});
+window.addEventListener('appinstalled',function(){localStorage.setItem('pp_installed','1');deferredPrompt=null;hideInstallModal();});
+setTimeout(function(){var m=document.getElementById('installmodal');if(installEligible()&&m&&m.style.display!=='flex')showInstallModal();},3500);
+if(S.proPhone){checkPro(true);}
+refreshCompass();
+try{rpc('tracker_enabled',{p_app:'polaris-pro'}).then(function(v){trackerEnabled=(v!==false);refreshCompass();}).catch(function(){});}catch(e){}
+setTimeout(function(){var im=document.getElementById('installmodal');if(im&&im.style.display!=='flex')showTrackerIntro();},1400);
+</script>
+</body>
+</html>
